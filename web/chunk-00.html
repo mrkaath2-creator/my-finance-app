@@ -351,8 +351,9 @@ function renderInvest(p){(async()=>{
   const r=document.getElementById('investMain');
   const last=(await all('calculations')).sort((a,b)=>b.ts-a.ts)[0]?.data;
   const activeRisk=settings.risk||p||'balanced';
-  if(investTabs)investTabs.style.display=(settings.planMode||'invest')==='deposit'?'none':'flex';
-  const depositMode=(settings.planMode||'invest')==='deposit';if(investTabs)investTabs.style.display=depositMode?'none':'flex';
+  const investTabs=document.getElementById('investTabs');
+  const depositMode=(settings.planMode||'invest')==='deposit';
+  if(investTabs)investTabs.style.display=depositMode?'none':'flex';
   document.querySelectorAll('#investTabs button').forEach(b=>b.classList.toggle('active',b.dataset.risk===activeRisk));
   if((settings.planMode||'invest')==='deposit'){
     const history=await all('calculations');
