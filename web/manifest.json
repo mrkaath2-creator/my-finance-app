@@ -1,0 +1,11 @@
+{
+  "name": "Мои Финансы",
+  "short_name": "Финансы",
+  "description": "Мобильный финансовый калькулятор с историей и инвестиционными сценариями для РФ",
+  "lang": "ru",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#08111f",
+  "theme_color": "#0b1220",
+  "orientation": "portrait"
+}
