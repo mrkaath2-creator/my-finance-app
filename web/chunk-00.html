@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
+  <meta name="app-version" content="5.0" />
   <meta name="description" content="Мои Финансы — расчёт расходов, бензина, резерва и инвестиционного плана для РФ." />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon-192.png" />
@@ -333,6 +334,7 @@ function renderInvest(p){(async()=>{
   const r=document.getElementById('investMain');
   const last=(await all('calculations')).sort((a,b)=>b.ts-a.ts)[0]?.data;
   const activeRisk=settings.risk||p||'balanced';
+  if(investTabs)investTabs.style.display=(settings.planMode||'invest')==='deposit'?'none':'flex';
   document.querySelectorAll('#investTabs button').forEach(b=>b.classList.toggle('active',b.dataset.risk===activeRisk));
   if((settings.planMode||'invest')==='deposit'){
     const history=await all('calculations');
@@ -355,7 +357,7 @@ function renderInvest(p){(async()=>{
 
 async function renderHistory(){const list=document.getElementById('historyList');const rows=(await all('calculations')).sort((a,b)=>b.ts-a.ts);if(!rows.length){list.innerHTML='<div class="card empty">История пока пуста.</div>';return}list.innerHTML=rows.map((x,i)=>{const r=x.data;r._ts=x.ts;const isDeposit=r.planMode==='deposit';return `<div class="history-item"><div><div class="date">${new Date(x.ts).toLocaleString('ru-RU')}</div><div style="margin-top:3px;font-weight:850">${esc(r.note||'Расчёт')}</div><div class="history-detail">Доход ${money(r.amount)} · жизнь ${money(r.life||0)} · бензин ${money(r.fuel||0)} · авто ${money(r.car||0)} · ${r.mileage||0} км</div><div class="history-detail">${isDeposit?'Вклад':'Инвестиции'}: <b>${money(r.target||r.invest||0)}</b> · ставка ${pct(r.rate||0)}${r.horizon?` · прогноз ${r.horizon} г. — ${money(r.projection?.value||0)}`:''}</div></div><div><div class="total">${money(r.amount)}</div><div class="date">№${rows.length-i}</div></div></div>`}).join('')}
 
-async function exportDB(){const settings=await loadSettings(),calculations=await all('calculations'),market=await loadMarket();const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),settings,market,calculations},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`my-finance-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Резервная копия подготовлена')}
+async function exportDB(){const settings=await loadSettings(),calculations=await all('calculations'),refuels=await all('refuels'),market=await loadMarket();const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),settings,market,calculations,refuels},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`my-finance-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Резервная копия подготовлена')}
 async function clearHistory(){
   try{
     const items=await all('calculations');
