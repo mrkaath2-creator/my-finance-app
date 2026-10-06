@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="description" content="Мои Финансы — расчёт расходов, бензина, резерва и инвестиционного плана для РФ." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <title>Мои Финансы</title>
+  <style>
+    :root{
+      --bg:#08111f; --surface:#101b2d; --surface2:#15233a; --text:#f2f6fb; --muted:#8fa1ba;
+      --accent:#6ee7b7; --accent2:#60a5fa; --warn:#fbbf24; --danger:#fb7185; --line:rgba(255,255,255,.08);
+      --shadow:0 18px 50px rgba(0,0,0,.28); --radius:22px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    *{box-sizing:border-box} html{background:var(--bg)} body{margin:0;background:linear-gradient(180deg,#08111f 0%,#0a1424 50%,#07101c 100%);color:var(--text);min-height:100vh}
+    button,input,select{font:inherit} button{cursor:pointer}
+    .app{max-width:780px;margin:0 auto;padding:env(safe-area-inset-top) 14px calc(94px + env(safe-area-inset-bottom));}
+    header{padding:18px 4px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(8,17,31,.98),rgba(8,17,31,.84),transparent);backdrop-filter:blur(12px)}
+    .brand{display:flex;gap:11px;align-items:center}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#6ee7b7,#60a5fa);display:grid;place-items:center;color:#06101b;font-weight:950;font-size:19px;box-shadow:0 8px 26px rgba(96,165,250,.22)}
+    h1{font-size:19px;margin:0 0 2px}.sub{font-size:12px;color:var(--muted)}
+    .icon-btn,.pill-btn{border:1px solid var(--line);background:rgba(21,35,58,.78);color:var(--text);border-radius:13px;padding:10px 12px}.icon-btn{width:42px;height:42px}
+    .view{display:none}.view.active{display:block}.hero{padding:20px;border:1px solid var(--line);border-radius:28px;background:radial-gradient(120% 100% at 0% 0%,rgba(96,165,250,.22),transparent 50%),linear-gradient(145deg,#12223a,#0e192a);box-shadow:var(--shadow);overflow:hidden;position:relative}
+    .eyebrow{color:var(--accent);font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.hero h2{margin:7px 0 6px;font-size:29px;line-height:1.08}.hero p{color:#b9c7d9;margin:0;line-height:1.45;font-size:14px}
+    .big-number{font-size:40px;font-weight:900;letter-spacing:-.03em;margin-top:16px}.big-number span{font-size:19px;color:var(--muted);font-weight:700}
+    .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.row3{grid-template-columns:repeat(3,minmax(0,1fr))}.section-title{font-size:15px;font-weight:850;margin:20px 3px 10px}.grid{display:grid;gap:10px}.card{background:rgba(16,27,45,.88);border:1px solid var(--line);border-radius:var(--radius);padding:15px;box-shadow:0 10px 34px rgba(0,0,0,.16)}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:700} input,select{width:100%;background:#0b1627;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px 13px;outline:none} input:focus,select:focus{border-color:rgba(96,165,250,.8);box-shadow:0 0 0 3px rgba(96,165,250,.12)}
+    .field{min-width:0}.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.3}.btn{border:0;border-radius:15px;padding:13px 15px;color:#06111e;font-weight:900;background:linear-gradient(135deg,var(--accent),#8cf0ff);box-shadow:0 10px 24px rgba(110,231,183,.12)}.btn.secondary{color:var(--text);background:#182842;border:1px solid var(--line);box-shadow:none}.btn.full{width:100%}
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{padding:14px;border-radius:17px;background:#0d192b;border:1px solid var(--line)}.metric .k{font-size:11px;color:var(--muted)}.metric .v{font-size:20px;font-weight:900;margin-top:4px}.good{color:var(--accent)}.warn{color:var(--warn)}.danger{color:var(--danger)}
+    .alloc{display:grid;gap:10px}.alloc-row{display:grid;grid-template-columns:128px 1fr 66px;align-items:center;gap:9px}.alloc-name{font-size:12px;font-weight:750}.bar{height:10px;background:#0a1322;border-radius:99px;overflow:hidden;border:1px solid var(--line)}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#60a5fa,#6ee7b7)}.amount{font-size:12px;font-weight:900;text-align:right}.tag{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:10px;background:#122138;border:1px solid var(--line);color:#bdd0e7;font-size:11px;font-weight:800}
+    .market{display:flex;flex-wrap:wrap;gap:8px}.market .chip{flex:1 1 145px;min-width:120px;background:#0d192b;border:1px solid var(--line);border-radius:15px;padding:11px}.chip .t{font-size:11px;color:var(--muted)}.chip .n{font-size:17px;font-weight:900;margin-top:2px}.chip small{font-size:10px;color:var(--muted)}
+    .nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:20;width:min(780px,100%);padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(8,17,31,0),rgba(8,17,31,.97) 30%);backdrop-filter:blur(10px);display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.nav button{border:1px solid transparent;background:rgba(16,27,45,.92);color:var(--muted);border-radius:16px;padding:9px 3px 8px;font-size:10px;font-weight:750}.nav button.active{color:var(--text);border-color:rgba(110,231,183,.2);background:#14253d}.nav .ico{display:block;font-size:17px;margin-bottom:2px}
+    .tabs{display:flex;gap:7px;overflow:auto;padding-bottom:2px}.tabs button{white-space:nowrap}.tabs button.active{background:linear-gradient(135deg,#1c3554,#162944);border-color:rgba(96,165,250,.35)} .mode-choice{width:100%;min-height:48px}.mode-choice.active{background:linear-gradient(135deg,#163451,#173224);border-color:rgba(110,231,183,.45);color:var(--text)}
+    .invest-card{position:relative}.invest-card .rec{position:absolute;right:11px;top:11px}.rate{font-size:25px;font-weight:950}.invest-card h3{margin:8px 0 5px;font-size:16px}.invest-card p{margin:0;color:#b6c6da;font-size:12px;line-height:1.42}.mini-list{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:7px}.mini-list li{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#c5d2e2}.mini-list b{color:var(--text)}
+    .history-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:13px;border-radius:16px;background:#0d192b;border:1px solid var(--line)}.history-item + .history-item{margin-top:8px}.history-item .date{font-size:11px;color:var(--muted)}.history-item .total{font-size:18px;font-weight:900}.history-detail{margin-top:5px;font-size:11px;color:#b8c7da;line-height:1.45}.empty{text-align:center;padding:34px 16px;color:var(--muted)}
+    .toggle{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:11px 0}.switch{width:46px;height:26px;border-radius:99px;background:#243750;padding:3px;border:1px solid var(--line)}.switch i{display:block;width:18px;height:18px;border-radius:50%;background:#94a3b8;transition:.2s}.switch.on{background:#16614d}.switch.on i{transform:translateX(18px);background:#6ee7b7}
+    .note{font-size:11px;color:#8fa1ba;line-height:1.5;padding:12px;border-radius:14px;background:#0b1525;border:1px solid var(--line)}.source{font-size:10px;color:#7f92ad;text-decoration:none}.source:hover{text-decoration:underline}
+    .toast{position:fixed;left:50%;bottom:95px;transform:translateX(-50%) translateY(15px);background:#eef6ff;color:#08111f;padding:11px 14px;border-radius:13px;font-size:12px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:50;box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media (max-width:430px){.app{padding-left:11px;padding-right:11px}.hero{padding:17px}.hero h2{font-size:25px}.big-number{font-size:34px}.row{grid-template-columns:1fr 1fr}.alloc-row{grid-template-columns:105px 1fr 61px}.nav button{font-size:9px}.nav .ico{font-size:16px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">₽</div><div><h1>Мои Финансы</h1><div class="sub" id="headerSub">Личный финансовый калькулятор</div></div></div>
+    <button class="icon-btn" id="syncBtn" aria-label="Обновить базу">↻</button>
+  </header>
+
+  <main>
+    <section id="home" class="view active">
+      <div class="hero">
+        <div class="eyebrow">Финансовый план</div>
+        <h2>Разложи деньги<br>по своим задачам.</h2>
+        <p>Последний сохранённый доход и его распределение. Новый день добавляется одной цифрой — без ручных накоплений и таблиц.</p>
+        <div class="big-number" id="homeTotal">0 <span>₽</span></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" data-go="calc">Новый расчёт</button>
+          <button class="btn secondary" data-go="invest">Инвестиции</button>
+        </div>
+      </div>
+      <div class="section-title">Сейчас</div>
+      <div class="summary-grid">
+        <div class="metric"><div class="k" id="homePlanLabel">Свободно для инвестиций</div><div class="v good" id="homeInvest">0 ₽</div></div>
+        <div class="metric"><div class="k">На жизнь</div><div class="v" id="homeLife">0 ₽</div></div>
+        <div class="metric"><div class="k">Бензин</div><div class="v" id="homeFuel">0 ₽</div></div>
+        <div class="metric"><div class="k">Резерв авто</div><div class="v" id="homeCar">0 ₽</div></div>
+      </div>
+      <div class="section-title">Рыночный ориентир РФ</div>
+      <div class="card"><div class="market" id="marketChips"></div><div class="hint" id="marketUpdated">Последнее обновление: —</div></div>
+      <div class="section-title">Последний расчёт</div>
+      <div id="lastCard"></div>
+    </section>
+
+    <section id="calc" class="view">
+      <div class="section-title" style="margin-top:5px">Доход за сегодня</div>
+      <div class="hero" style="padding:18px">
+        <div class="eyebrow">Яндекс Доставка</div>
+        <h2 style="font-size:24px">Введи только заработок за день.</h2>
+        <p>Приложение само разложит деньги по твоим постоянным правилам: жизнь, бензин, автомобильный резерв, финансовый запас и инвестиции.</p>
+        <div class="grid" style="margin-top:16px">
+          <div class="field">
+            <label>💰 Сколько заработал сегодня, ₽</label>
+            <input id="dailyIncome" type="number" inputmode="decimal" min="0" step="50" placeholder="Например, 3200" autofocus>
+          </div>
+          <div class="field">
+            <label>🚗 Сколько проехал сегодня, км</label>
+            <input id="dailyKm" type="number" inputmode="decimal" min="0" step="1" placeholder="Например, 72">
+          </div>
+        </div>
+        <div class="hint" style="margin-top:6px">Пробег нужен для точного расчёта бензина и резерва машины. Последний введённый пробег подставляется автоматически.</div>
+        <button class="btn full" id="calcBtn" style="margin-top:12px">Рассчитать день</button>
+      </div>
+      <div class="section-title">Твои автоматические правила</div>
+      <div class="card">
+        <div class="summary-grid">
+          <div class="metric"><div class="k">Жизнь / день</div><div class="v" id="ruleLife">0 ₽</div></div>
+          <div class="metric"><div class="k">Бензин по пробегу</div><div class="v" id="ruleFuel">0 ₽</div></div>
+          <div class="metric"><div class="k">Резерв авто</div><div class="v" id="ruleCar">0 ₽</div></div>
+          <div class="metric"><div class="k">Фин. запас</div><div class="v" id="ruleBuffer">0 ₽</div></div>
+        </div>
+        <div class="hint" style="margin-top:10px">Правила меняются один раз в «Настройках». После этого для нового дня нужен только доход.</div>
+      </div>
+      <div id="calcResult" style="display:none"></div>
+    </section>
+
+    <section id="invest" class="view">
+      <div class="section-title" style="margin-top:5px">Куда направить инвестиционные деньги</div>
+      <div class="tabs" id="investTabs">
+        <button class="pill-btn active" data-risk="conservative">Спокойный</button>
+        <button class="pill-btn" data-risk="balanced">Баланс</button>
+        <button class="pill-btn" data-risk="growth">Рост</button>
+      </div>
+      <div id="investMain" class="grid" style="margin-top:10px"></div>
+      <div class="section-title">Что показывает приложение</div>
+      <div class="note">Расчёты используют текущие рыночные ориентиры как входные данные и сценарные ставки для рискованных активов. Реальная доходность может быть ниже, выше или отрицательной. Комиссии и налоги не включены, если не указано обратное.</div>
+    </section>
+
+    <section id="history" class="view">
+      <div class="section-title" style="margin-top:5px">История расчётов</div>
+      <div class="row" style="margin-bottom:10px"><button class="btn secondary" id="exportBtn">Экспорт базы</button><button type="button" class="btn secondary" id="clearHistoryBtn">Очистить историю</button></div>
+      <div id="historyList"></div>
+    </section>
+
+    <section id="settings" class="view">
+      <div class="section-title" style="margin-top:5px">Настройки</div>
+      <div class="card grid">
+        <div class="field"><label>Имя/название профиля</label><input id="profileName" value="Мои Финансы"></div>
+        <div class="field"><label>На жизнь / день, ₽</label><input id="sLifeDaily" type="number" step="50" value="1000"></div>
+        <div class="row">
+          <div class="field"><label>Цена бензина, ₽/л</label><input id="sFuelPrice" type="number" step="0.1" value="69.10"></div>
+          <div class="field"><label>Расход автомобиля, л/100 км</label><input id="sFuelConsumption" type="number" step="0.1" value="10"></div>
+        </div>
+        <div class="field"><label>Обычный пробег / день, км</label><input id="sWorkKm" type="number" step="1" value="60"></div>
+        <div class="field">
+          <label>Что делать со свободными деньгами</label>
+          <div class="row" style="grid-template-columns:1fr 1fr">
+            <button type="button" class="pill-btn mode-choice active" id="modeInvestBtn">📈 Инвестировать</button>
+            <button type="button" class="pill-btn mode-choice" id="modeDepositBtn">🏦 На вклад</button>
+          </div>
+          <div class="hint">Этот выбор автоматически применяется к каждому новому расчёту.</div>
+        </div>
+        <div class="field" id="depositSettingsField">
+          <label>Ставка моего вклада, % годовых</label>
+          <input id="sDepositRate" type="number" min="0" max="100" step="0.1" value="14" placeholder="Например, 14.5">
+          <div class="hint">Укажи ставку именно своего вклада. Проценты считаются от накопленного остатка.</div>
+        </div>
+        <div class="field" id="depositStartField" style="display:none">
+          <label>Уже лежит на этом вкладе, ₽</label>
+          <input id="sDepositStart" type="number" min="0" step="100" value="0" placeholder="Например, 10000">
+          <div class="hint">Это стартовая сумма. Затем приложение прибавляет все сохранённые пополнения из истории.</div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Резерв авто, ₽/км</label><input id="sCarPerKm" type="number" step="0.5" value="4"></div>
+          <div class="field"><label>Финансовый запас, %</label><input id="sBufferPct" type="number" min="0" max="50" step="1" value="10"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Рабочих дней / месяц</label><input id="sWorkDays" type="number" min="1" max="31" step="1" value="22"></div>
+          <div class="field"><label>Инвестиционный горизонт</label><select id="sHorizon"><option value="1">1 год</option><option value="3" selected>3 года</option><option value="5">5 лет</option><option value="10">10 лет</option></select></div>
+        </div>
+        <div class="field" id="investSettingsField"><label>Инвестиционный профиль</label><select id="sRisk"><option value="conservative">Спокойный</option><option value="balanced" selected>Баланс</option><option value="growth">Рост</option></select><div class="hint">Профиль влияет на распределение инвестиционной части. Это расчётный сценарий, а не гарантия доходности.</div></div>
+        <div class="toggle"><div><b>Авто-синхронизация рынка</b><div class="hint">Пробовать обновлять рыночные ориентиры при открытии.</div></div><div class="switch on" id="autoSwitch"><i></i></div></div>
+        <button class="btn full" id="saveSettingsBtn">Сохранить правила</button>
+      </div>
+      <div class="section-title">Рыночные данные</div>
+      <div class="card grid">
+        <a class="source" href="https://www.cbr.ru/hd_base/KeyRate/" target="_blank" rel="noopener">Банк России — ключевая ставка</a>
+        <a class="source" href="https://www.cbr.ru/hd_base/ruonia/sv_ruonia/" target="_blank" rel="noopener">Банк России — RUONIA</a>
+        <a class="source" href="https://www.cbr.ru/hd_base/zcyc_params/zcyc/" target="_blank" rel="noopener">Банк России — кривая доходности ОФЗ</a>
+        <a class="source" href="https://www.moex.com/a2193" target="_blank" rel="noopener">Московская биржа — ISS</a>
+        <div class="note">История расчётов и настройки хранятся локально на этом устройстве. «Экспорт базы» создаёт резервную копию JSON.</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="nav" aria-label="Навигация">
+  <button data-go="home" class="active"><span class="ico">⌂</span>Главная</button>
+  <button data-go="calc"><span class="ico">＋</span>Доход</button>
+  <button data-go="invest"><span class="ico">↗</span>Инвестиции</button>
+  <button data-go="history"><span class="ico">◷</span>История</button>
+  <button data-go="settings"><span class="ico">⚙</span>Настройки</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const DB_NAME='my_finance_db_v1', DB_VER=2;
+let db;
+const seedMarket={
+  keyRate:14.00, ruonia1m:14.0994, ruonia3m:14.2781, ofz2y:15.13, ofz5y:16.37, ofz10y:16.80,
+  date:'05.10.2026', source:'Банк России', syncedAt:new Date().toISOString()
+};
+const profileDefaults={
+  name:'Мои Финансы', fuelPrice:69.10, fuelConsumption:10, autoSync:true,
+  lifeDaily:1000, workKmPerDay:60, carPerKm:4, bufferPct:10, workDaysPerMonth:22,
+  depositRate:14, depositStart:0, lastDailyKm:60, planMode:'invest',
+  risk:'balanced', horizon:3,
+  scenario:{stocks:10, gold:7, equityRiskPremium:0}
+};
+const profiles={
+  conservative:{name:'Спокойный', desc:'Приоритет — сохранность и более предсказуемый денежный поток.', alloc:{mmf:55,ofz:35,stocks:0,gold:10}},
+  balanced:{name:'Баланс', desc:'Смешанный подход: защита от высокой ставки + умеренный рост.', alloc:{mmf:30,ofz:40,stocks:20,gold:10}},
+  growth:{name:'Рост', desc:'Длинный горизонт и большая доля акций; колебания могут быть сильнее.', alloc:{mmf:10,ofz:30,stocks:50,gold:10}}
+};
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(Number(n)||0))+' ₽';
+const pct=n=>(Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2})+'%';
+const num=id=>Math.max(0,Number(document.getElementById(id)?.value)||0);
+function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VER);req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'id'});if(!d.objectStoreNames.contains('calculations')){const s=d.createObjectStore('calculations',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts')}if(!d.objectStoreNames.contains('market'))d.createObjectStore('market',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store)}
+const put=(store,val)=>new Promise((res,rej)=>{const r=tx(store,'readwrite').put(val);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const get=(store,key)=>new Promise((res,rej)=>{const r=tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const all=(store)=>new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)});
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.go===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='history')renderHistory();if(id==='invest')loadSettings().then(s=>renderInvest(s.risk||'balanced'))}
+function calcProjection(principal,rate,years,monthly=0){let m=rate/100/12, n=years*12;let v=principal*Math.pow(1+m,n)+monthly*((Math.pow(1+m,n)-1)/m||n);return {value:v,profit:v-(principal+monthly*n)}}
+function weightedRate(p,market){const a=profiles[p].alloc;const r={mmf:market.ruonia3m,ofz:market.ofz2y,stocks:10,gold:7};return (a.mmf*r.mmf+a.ofz*r.ofz+a.stocks*r.stocks+a.gold*r.gold)/100}
+function investmentRows(capital,p,market){const a=profiles[p].alloc;const rates={mmf:market.ruonia3m,ofz:market.ofz2y,stocks:10,gold:7};const names={mmf:'Денежный фонд',ofz:'ОФЗ',stocks:'Акции РФ',gold:'Золото'};const why={mmf:'Ликвидная часть портфеля и короткий горизонт.',ofz:'Госдолг РФ; ориентир на кривую доходности ЦБ.',stocks:'Доля для долгосрочного роста, но с заметным риском просадки.',gold:'Небольшая защитная доля; цена может заметно колебаться.'};return Object.entries(a).filter(([k,v])=>v>0).map(([k,v])=>({key:k,name:names[k],share:v,amount:capital*v/100,rate:rates[k],why:why[k]}))}
+async function loadMarket(){let m=await get('market','current');return m?.data||seedMarket}
+async function saveMarket(data){await put('market',{id:'current',data})}
+function renderMarket(m){document.getElementById('marketChips').innerHTML=[['Ключевая ставка',m.keyRate],['RUONIA 1 мес.',m.ruonia1m],['RUONIA 3 мес.',m.ruonia3m],['ОФЗ 2 года',m.ofz2y],['ОФЗ 5 лет',m.ofz5y],['ОФЗ 10 лет',m.ofz10y]].map(x=>`<div class="chip"><div class="t">${esc(x[0])}</div><div class="n">${pct(x[1])}</div><small>годовых / ориентир</small></div>`).join('');document.getElementById('marketUpdated').textContent=`Последнее обновление: ${new Date(m.syncedAt).toLocaleString('ru-RU')}. Дата данных: ${m.date}.`}
+async function refreshMarket(){
+  const btn=document.getElementById('syncBtn');btn.textContent='…';
+  try{
+    const kr=await fetch('https://www.cbr.ru/hd_base/KeyRate/',{cache:'no-store'});const kt=await kr.text();
+    const km=kt.match(/(\d{2}\.\d{2}\.2026)\s*[^\d]{0,40}(\d{1,2}[.,]\d{2})/);
+    const z=await fetch('https://www.cbr.ru/hd_base/zcyc_params/zcyc/?DateTo=05.10.2026',{cache:'no-store'});const zt=await z.text();
+    const zm=zt.match(/Доходность,\s*% годовых\s+((?:\d+[.,]\d+\s*){12})/);
+    let m=await loadMarket();
+    if(km)m.keyRate=parseFloat(km[2].replace(',','.')),m.date=km[1];
+    if(zm){const arr=zm[1].trim().split(/\s+/).map(x=>parseFloat(x.replace(',','.')));m.ofz2y=arr[4];m.ofz5y=arr[6];m.ofz10y=arr[8];m.date='05.10.2026';}
+    // RUONIA page is parsed separately where browser CORS permits.
+    try{const r=await fetch('https://cbr.ru/hd_base/ruonia/sv_ruonia/',{cache:'no-store'});const rt=await r.text();const rm=rt.match(/Срочная версия RUONIA на 1 месяц\s+(\d+[.,]\d+)\s+(\d+[.,]\d+)/);if(rm){m.ruonia1m=parseFloat(rm[2].replace(',','.'));}const r3=rt.match(/Срочная версия RUONIA на 3 месяца\s+(\d+[.,]\d+)\s+(\d+[.,]\d+)/);if(r3)m.ruonia3m=parseFloat(r3[2].replace(',','.'));}catch(e){}
+    m.syncedAt=new Date().toISOString();await saveMarket(m);renderMarket(m);const settings=await loadSettings();renderInvest(settings.risk||'balanced');toast('Рынок обновлён');
+  }catch(e){toast('Не удалось обновить — оставлены последние данные');}
+  btn.textContent='↻';
+}
+async function loadSettings(){const saved=(await get('settings','profile'))?.data;return {...profileDefaults,...(saved||{})}}
+async function saveSettings(s){await put('settings',{id:'profile',data:s})}
+function applySettings(s){
+  document.getElementById('profileName').value=s.name;
+  const set={sFuelPrice:s.fuelPrice,sFuelConsumption:s.fuelConsumption??10,sWorkKm:s.workKmPerDay,sDepositRate:s.depositRate??14,sDepositStart:s.depositStart??0,sLifeDaily:s.lifeDaily,sCarPerKm:s.carPerKm,sBufferPct:s.bufferPct,sWorkDays:s.workDaysPerMonth,sRisk:s.risk,sHorizon:s.horizon,sPlanMode:s.planMode||'invest'};
+  Object.entries(set).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
+  document.getElementById('autoSwitch').classList.toggle('on',!!s.autoSync);
+  document.getElementById('headerSub').textContent=s.name;
+  const km=document.getElementById('dailyKm');if(km)km.value=s.lastDailyKm??s.workKmPerDay??60;
+  updateRules(s);updatePlanModeUI(s);
+}
+function updateRules(s){
+  const life=Number(s.lifeDaily)||0,km=Number(s.workKmPerDay)||0;
+  const fuel=km*(Number(s.fuelConsumption)||0)/100*(Number(s.fuelPrice)||0);
+  const car=km*(Number(s.carPerKm)||0),base=life+fuel+car,buffer=base*(Number(s.bufferPct)||0)/100;
+  const map={ruleLife:life,ruleFuel:fuel,ruleCar:car,ruleBuffer:buffer};
+  Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=money(v)});
+}
+
+function getCalcInputs(){return {amount:num('dailyIncome'),mileage:num('dailyKm')}}
+
+function calculate(c,market,settings){
+  const income=c.amount;
+  const mileage=Math.max(0,Number(c.mileage)||Number(settings.lastDailyKm)||Number(settings.workKmPerDay)||0);
+  const life=Number(settings.lifeDaily)||0;
+  const fuel=mileage*(Number(settings.fuelConsumption)||0)/100*(Number(settings.fuelPrice)||0);
+  const car=mileage*(Number(settings.carPerKm)||0);
+  const fixed=life+fuel+car;
+  const buffer=Math.max(0,(income-fixed)*(Number(settings.bufferPct)||0)/100);
+  const target=Math.max(0,income-fixed-buffer);
+  const overspent=Math.max(0,fixed-income);
+  const planMode=settings.planMode||'invest';
+  const risk=settings.risk||'balanced';
+  const rate=planMode==='deposit'?(Number(settings.depositRate)||Number(market.keyRate)||14):weightedRate(risk,market);
+  const horizon=Number(settings.horizon)||3;
+  const workDays=Number(settings.workDaysPerMonth)||22;
+  const monthly=target*workDays;
+  const depositBalanceBefore=Number(c.depositBalanceBefore)||0;
+  const depositBalance=planMode==='deposit'?depositBalanceBefore+target:0;
+  const monthlyInterest=planMode==='deposit'?depositBalance*(rate/100/12):0;
+  const nextMonthBalance=planMode==='deposit'?depositBalance+monthly+monthlyInterest:0;
+  const projection=planMode==='deposit'?calcProjection(depositBalance,rate,horizon,monthly):calcProjection(target,rate,horizon,monthly);
+  const rows=planMode==='invest'?investmentRows(target,risk,market):[];
+  return {life,fuel,car,buffer,target,invest:planMode==='invest'?target:0,deposit:planMode==='deposit'?target:0,mileage,overspent,rate,projection,rows,total:income,amount:income,risk,horizon,monthly,workDaysPerMonth:workDays,planMode,depositBalance,depositBalanceBefore,monthlyInterest,nextMonthBalance,mode:'daily',note:'Доход за день — Яндекс Доставка'};
+}
+
+
+function renderCalcResult(r){
+  const el=document.getElementById('calcResult');el.style.display='block';
+  const invRows=r.rows.map(x=>`<div class="alloc-row"><div class="alloc-name">${esc(x.name)} <span class="tag">${x.share}%</span></div><div class="bar"><i style="width:${x.share}%"></i></div><div class="amount">${money(x.amount)}</div></div>`).join('');
+  const targetBlock=r.planMode==='deposit'
+    ? `<div class="card" style="margin-top:10px;background:linear-gradient(145deg,#142d48,#0e192a)"><div class="section-title" style="margin:0 0 4px">🏦 Откладывать на вклад</div><div class="big-number" style="font-size:33px;margin-top:0">${money(r.target)}</div><div class="row" style="margin-top:10px"><div class="metric"><div class="k">Остаток на вкладе после сегодня</div><div class="v">${money(r.depositBalance)}</div></div><div class="metric"><div class="k">Доход за следующий месяц</div><div class="v good">+${money(r.monthlyInterest)}</div></div></div><div class="metric" style="margin-top:10px"><div class="k">Будет через следующий месяц</div><div class="v good">${money(r.nextMonthBalance)}</div></div><div class="hint" style="margin-top:9px">${pct(r.rate)} годовых. Доход за месяц считается от накопленного остатка на вкладе; затем к нему добавляется новый месячный остаток. Фактический банк может считать проценты по дням.</div></div>`
+    : `<div class="card" style="margin-top:10px;background:linear-gradient(145deg,#102d2a,#0e192a)"><div class="section-title" style="margin:0 0 4px">Инвестировать сегодня</div><div class="big-number" style="font-size:33px;margin-top:0">${money(r.target)}</div>${r.target?`<div class="alloc" style="margin-top:12px">${invRows}</div>`:'<div class="hint">Сегодня инвестиционной части не осталось: сначала закрываются заданные расходы.</div>'}</div>`;
+  const profit=r.projection.profit;
+  el.innerHTML=`<div class="section-title">Куда разложить ${money(r.total)}</div>
+  <div class="summary-grid"><div class="metric"><div class="k">На жизнь</div><div class="v">${money(r.life)}</div></div><div class="metric"><div class="k">Бензин · ${r.mileage} км</div><div class="v">${money(r.fuel)}</div></div><div class="metric"><div class="k">Резерв авто · ${r.mileage} км</div><div class="v">${money(r.car)}</div></div><div class="metric"><div class="k">Финансовый запас</div><div class="v">${money(r.buffer)}</div></div></div>
+  ${targetBlock}
+  <div class="card" style="margin-top:10px"><div class="section-title" style="margin:0 0 8px">Прогноз ${r.planMode==='deposit'?'по вкладу':'при таком же заработке'}</div><div class="row"><div class="metric"><div class="k">Остаток за месяц</div><div class="v">${money(r.monthly)}</div></div><div class="metric"><div class="k">Доход за месяц</div><div class="v good">+${money(r.planMode==='deposit'?r.monthlyInterest:0)}</div></div></div><div class="row" style="margin-top:10px"><div class="metric"><div class="k">Ставка для прогноза</div><div class="v">${pct(r.rate)}</div></div><div class="metric"><div class="k">К выплате после 1-го месяца</div><div class="v good">${money(r.planMode==='deposit'?r.nextMonthBalance:r.monthly)}</div></div></div><div class="row" style="margin-top:10px"><div class="metric"><div class="k">Вложено за ${r.horizon} ${r.horizon===1?'год':'года'}</div><div class="v">${money(r.monthly*r.horizon*12)}</div></div><div class="metric"><div class="k">Прогноз через ${r.horizon} ${r.horizon===1?'год':'года'}</div><div class="v good">${money(r.projection.value)}</div></div></div><div class="metric" style="margin-top:10px"><div class="k">Ориентировочный доход</div><div class="v good">+${money(profit)}</div></div><div class="hint">Предполагается ${r.workDaysPerMonth} рабочих дней в месяц. Доходность не гарантируется; для инвестиций комиссии, налоги, инфляция и изменение цен не учтены.</div></div>${r.overspent?`<div class="note danger" style="margin-top:10px">Дохода за день не хватает на базовые расходы на ${money(r.overspent)}. Приложение ничего не списывает.</div>`:''}`;
+}
+
+
+async function saveCalculation(r){r._ts=Date.now();await put('calculations',{ts:r._ts,data:r});}
+async function runCalculation(){
+  const income=num('dailyIncome');if(!income){toast('Введи доход за день');return}
+  const settings=await loadSettings();
+  const mileage=Math.max(0,Number(document.getElementById('dailyKm').value)||Number(settings.lastDailyKm)||Number(settings.workKmPerDay)||0);
+  settings.lastDailyKm=mileage;await saveSettings(settings);
+  const market=await loadMarket();
+  let depositBalanceBefore=Number(settings.depositStart)||0;
+  if((settings.planMode||'invest')==='deposit'){
+    const history=await all('calculations');
+    depositBalanceBefore+=history.reduce((sum,x)=>sum+Number(x.data?.deposit||0),0);
+  }
+  const r=calculate({amount:income,mileage,depositBalanceBefore},market,settings);
+  await saveCalculation(r);
+  renderCalcResult(r);
+  await renderDashboard(r);
+  await renderHistory();
+  toast('День сохранён в базе');
+}
+
+
+async function renderDashboard(last){
+  const r=last || (await all('calculations')).sort((a,b)=>b.ts-a.ts)[0]?.data;const amount=r?.amount||0;const isDeposit=r?.planMode==='deposit';
+  document.getElementById('homeTotal').innerHTML=`${money(amount).replace(' ₽','')} <span>₽</span>`;
+  document.getElementById('homeInvest').textContent=money(r?.target??r?.invest??r?.deposit??0);document.getElementById('homePlanLabel').textContent=isDeposit?'Свободно на вклад':'Свободно для инвестиций';
+  document.getElementById('homeLife').textContent=money(r?.life||0);document.getElementById('homeFuel').textContent=money(r?.fuel||0);document.getElementById('homeCar').textContent=money(r?.car||0);
+  const card=document.getElementById('lastCard');card.innerHTML=r?`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;align-items:start"><div><div class="date">${new Date(r._ts||Date.now()).toLocaleString('ru-RU')}</div><b>${esc(r.note||'Финансовый расчёт')}</b></div><span class="tag">${isDeposit?'Вклад':profiles[r.risk]?.name||r.risk}</span></div><div class="history-detail">Сегодня: <b>${money(r.amount)}</b> · ${isDeposit?'на вклад':'инвестировать'}: <b>${money(r.target||0)}</b> · пробег: <b>${r.mileage||0} км</b> · прогноз: <b>${money(r.projection?.value||0)}</b></div></div>`:'<div class="card empty">Пока нет расчётов. Нажми «Новый расчёт».</div>';
+}
+
+function renderInvest(p){(async()=>{
+  const m=await loadMarket();
+  const settings=await loadSettings();
+  const r=document.getElementById('investMain');
+  const last=(await all('calculations')).sort((a,b)=>b.ts-a.ts)[0]?.data;
+  const activeRisk=settings.risk||p||'balanced';
+  document.querySelectorAll('#investTabs button').forEach(b=>b.classList.toggle('active',b.dataset.risk===activeRisk));
+  if((settings.planMode||'invest')==='deposit'){
+    const history=await all('calculations');
+    const capital=Number(settings.depositStart)||0;
+    const historyDeposits=history.reduce((sum,x)=>sum+Number(x.data?.deposit||0),0);
+    const balance=capital+historyDeposits;
+    const monthly=last?.monthly||0;
+    const rate=Number(settings.depositRate)||Number(m.keyRate)||14;
+    const monthlyInterest=balance*rate/100/12;
+    const nextBalance=balance+monthly+monthlyInterest;
+    const oneYear=calcProjection(balance,rate,1,monthly).value;
+    const threeYear=calcProjection(balance,rate,3,monthly).value;
+    r.innerHTML=`<div class="card invest-card"><span class="tag rec">🏦 Вклад</span><div class="eyebrow">Накопление</div><h3>Свободные деньги идут на вклад с ежемесячным пополнением.</h3><div class="rate">${pct(rate)} <span style="font-size:11px;color:var(--muted);font-weight:700">твоя ставка</span></div><ul class="mini-list"><li><span>Сейчас на вкладе</span><b>${money(balance)}</b></li><li><span>Остаток при таком заработке / месяц</span><b>${money(monthly)}</b></li><li><span>Доход за следующий месяц</span><b>+${money(monthlyInterest)}</b></li></ul></div><div class="grid"><div class="card"><div class="section-title" style="margin:0 0 8px">Прогноз накоплений</div><div class="row"><div class="metric"><div class="k">Через 1 год</div><div class="v good">${money(oneYear)}</div></div><div class="metric"><div class="k">Через 3 года</div><div class="v good">${money(threeYear)}</div></div></div><div class="metric" style="margin-top:10px"><div class="k">Баланс после следующего месяца</div><div class="v good">${money(nextBalance)}</div></div><div class="hint" style="margin-top:10px">Расчёт предполагает одинаковое ежемесячное пополнение и ежемесячную капитализацию. Реальный результат зависит от условий вклада и способа начисления.</div></div></div>`;
+    return;
+  }
+  const capital=last?.invest||0;
+  const a=profiles[activeRisk],rate=weightedRate(activeRisk,m),rows=investmentRows(capital,activeRisk,m);
+  r.innerHTML=`<div class="card invest-card"><span class="tag rec">${capital?`Сейчас: ${money(capital)}`:'Нет суммы'}</span><div class="eyebrow">${esc(a.name)}</div><h3>${esc(a.desc)}</h3><div class="rate">${pct(rate)} <span style="font-size:11px;color:var(--muted);font-weight:700">сценарный ориентир</span></div><ul class="mini-list">${rows.map(x=>`<li><span>${esc(x.name)}</span><b>${x.share}% · ${money(x.amount)}</b></li>`).join('')}</ul></div><div class="grid">${rows.map(x=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>${esc(x.name)}</b><div class="hint">${esc(x.why)}</div></div><span class="tag">${pct(x.rate)}</span></div><div class="big-number" style="font-size:24px">${money(x.amount)}</div><div class="hint">Расчётная ставка для прогноза, не обещание дохода.</div></div>`).join('')||'<div class="card empty">Сначала сделай расчёт суммы.</div>'}</div>`;
+})()}
+
+async function renderHistory(){const list=document.getElementById('historyList');const rows=(await all('calculations')).sort((a,b)=>b.ts-a.ts);if(!rows.length){list.innerHTML='<div class="card empty">История пока пуста.</div>';return}list.innerHTML=rows.map((x,i)=>{const r=x.data;r._ts=x.ts;const isDeposit=r.planMode==='deposit';return `<div class="history-item"><div><div class="date">${new Date(x.ts).toLocaleString('ru-RU')}</div><div style="margin-top:3px;font-weight:850">${esc(r.note||'Расчёт')}</div><div class="history-detail">Доход ${money(r.amount)} · жизнь ${money(r.life||0)} · бензин ${money(r.fuel||0)} · авто ${money(r.car||0)} · ${r.mileage||0} км</div><div class="history-detail">${isDeposit?'Вклад':'Инвестиции'}: <b>${money(r.target||r.invest||0)}</b> · ставка ${pct(r.rate||0)}${r.horizon?` · прогноз ${r.horizon} г. — ${money(r.projection?.value||0)}`:''}</div></div><div><div class="total">${money(r.amount)}</div><div class="date">№${rows.length-i}</div></div></div>`}).join('')}
+
+async function exportDB(){const settings=await loadSettings(),calculations=await all('calculations'),market=await loadMarket();const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),settings,market,calculations},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`my-finance-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Резервная копия подготовлена')}
+async function clearHistory(){
+  try{
+    const items=await all('calculations');
+    if(items.length){
+      await new Promise((resolve,reject)=>{
+        const tr=db.transaction(['calculations'],'readwrite');
+        const store=tr.objectStore('calculations');
+        items.forEach(item=>{if(item.id!==undefined&&item.id!==null)store.delete(item.id)});
+        tr.oncomplete=()=>resolve();
+        tr.onerror=()=>reject(tr.error||new Error('Ошибка транзакции'));
+        tr.onabort=()=>reject(tr.error||new Error('Транзакция отменена'));
+      });
+    }
+    const result=document.getElementById('calcResult');
+    if(result)result.style.display='none';
+    await renderHistory();
+    await renderDashboard();
+    toast(items.length?'История полностью очищена':'История уже пустая');
+  }catch(e){
+    console.error(e);
+    toast('Не удалось очистить историю — проверь доступ к хранилищу');
+  }
+}
+
+
+async function saveSettingsUI(){
+  const s=await loadSettings();
+  s.name=document.getElementById('profileName').value.trim()||'Мои Финансы';
+  s.lifeDaily=num('sLifeDaily')||1000;
+  s.fuelPrice=num('sFuelPrice')||69.1;
+  s.fuelConsumption=num('sFuelConsumption')||10;
+  s.workKmPerDay=num('sWorkKm')||60;
+  s.depositRate=Math.max(0,Math.min(100,Number(document.getElementById('sDepositRate').value)||0));
+  s.depositStart=Math.max(0,Number(document.getElementById('sDepositStart').value)||0);
+  s.carPerKm=num('sCarPerKm')||4;
+  s.bufferPct=num('sBufferPct');
+  s.workDaysPerMonth=num('sWorkDays')||22;
+  s.planMode=s.planMode||'invest';
+  s.risk=document.getElementById('sRisk').value||'balanced';
+  s.horizon=Number(document.getElementById('sHorizon').value)||3;
+  s.autoSync=document.getElementById('autoSwitch').classList.contains('on');
+  await saveSettings(s);
+  document.getElementById('headerSub').textContent=s.name;
+  updateRules(s);
+  updatePlanModeUI(s);
+  await renderDashboard();
+  await renderHistory();
+  toast('Настройки сохранены');
+}
+function setPlanMode(mode){
+  const m=mode==='deposit'?'deposit':'invest';
+  const a=document.getElementById('modeInvestBtn'),b=document.getElementById('modeDepositBtn');
+  if(a)a.classList.toggle('active',m==='invest');
+  if(b)b.classList.toggle('active',m==='deposit');
+  const f=document.getElementById('investSettingsField');if(f)f.style.display=m==='invest'?'block':'none';
+  const d=document.getElementById('depositSettingsField');if(d)d.style.display=m==='deposit'?'block':'none';
+  const ds=document.getElementById('depositStartField');if(ds)ds.style.display=m==='deposit'?'block':'none';
+  const label=document.getElementById('homePlanLabel');if(label)label.textContent=m==='deposit'?'Свободно на вклад':'Свободно для инвестиций';
+  return m;
+}
+function updatePlanModeUI(s){setPlanMode(s?.planMode||'invest');}
+
+
+function wire(){
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
+  document.getElementById('calcBtn').addEventListener('click',runCalculation);
+  ['dailyIncome','dailyKm'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')runCalculation()})});
+  document.getElementById('syncBtn').addEventListener('click',refreshMarket);
+  document.getElementById('exportBtn').addEventListener('click',exportDB);
+  document.getElementById('clearHistoryBtn').addEventListener('click',clearHistory);
+  document.getElementById('saveSettingsBtn').addEventListener('click',saveSettingsUI);
+  document.getElementById('modeInvestBtn').addEventListener('click',async()=>{const s=await loadSettings();s.planMode='invest';updatePlanModeUI(s);await saveSettings(s);toast('Выбрано: инвестировать')});
+  document.getElementById('modeDepositBtn').addEventListener('click',async()=>{const s=await loadSettings();s.planMode='deposit';updatePlanModeUI(s);await saveSettings(s);toast('Выбрано: вклад')});
+  document.getElementById('autoSwitch').addEventListener('click',e=>e.currentTarget.classList.toggle('on'));
+  document.querySelectorAll('#investTabs button').forEach(b=>b.addEventListener('click',()=>renderInvest(b.dataset.risk)));
+}
+
+(async()=>{db=await openDB();let s=await loadSettings();if(s.fuelConsumption==null)s.fuelConsumption=s.fuelLitersPerDay&&s.workKmPerDay?Number(s.fuelLitersPerDay)*100/Number(s.workKmPerDay):10;if(s.planMode==null)s.planMode='invest';if(s.depositRate==null)s.depositRate=14;if(s.depositStart==null)s.depositStart=0;if(s.lastDailyKm==null)s.lastDailyKm=s.workKmPerDay||60;delete s.fuelLitersPerDay;await saveSettings(s);applySettings(s);const m=await loadMarket();renderMarket(m);renderInvest(s.risk||'balanced');await renderDashboard();wire();try{if(s.autoSync)refreshMarket()}catch(e){}if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});})();
+</script>
+</body>
+</html>
