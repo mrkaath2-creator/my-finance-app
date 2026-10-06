@@ -1,11 +1,12 @@
 {
   "name": "Мои Финансы",
   "short_name": "Финансы",
-  "description": "Мобильный финансовый калькулятор с историей и инвестиционными сценариями для РФ",
+  "description": "Личный финансовый журнал: доход, бензин, резерв автомобиля, вклад и инвестиции",
   "lang": "ru",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#08111f",
   "theme_color": "#0b1220",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
