@@ -41,6 +41,9 @@ jobs:
           cat web/chunk-* > app/src/main/assets/www/index.html
           cp web/manifest.json app/src/main/assets/www/manifest.json
           cp web/sw.js app/src/main/assets/www/sw.js
+          cp web/v9features.js app/src/main/assets/www/v9features.js
+          mkdir -p app/src/main/assets/tessdata
+          curl -L --fail --retry 3 -o app/src/main/assets/tessdata/rus.traineddata https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/rus.traineddata
 
       - name: Build debug APK
         run: gradle --no-daemon :app:assembleDebug
