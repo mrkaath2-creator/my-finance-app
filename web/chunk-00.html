@@ -203,7 +203,7 @@
 
 <script>
 'use strict';
-const DB_NAME='my_finance_db_v1', DB_VER=3;
+const DB_NAME='my_finance_db_v1', DB_VER=4;
 let db;
 const seedMarket={
   keyRate:14.00, ruonia1m:14.0994, ruonia3m:14.2781, ofz2y:15.13, ofz5y:16.37, ofz10y:16.80,
@@ -225,7 +225,7 @@ const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(Number(n)||0))+' ₽';
 const pct=n=>(Number(n)||0).toLocaleString('ru-RU',{maximumFractionDigits:2})+'%';
 const num=id=>Math.max(0,Number(document.getElementById(id)?.value)||0);
-function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VER);req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'id'});if(!d.objectStoreNames.contains('calculations')){const s=d.createObjectStore('calculations',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts')}if(!d.objectStoreNames.contains('market'))d.createObjectStore('market',{keyPath:'id'});if(!d.objectStoreNames.contains('refuels')){const s=d.createObjectStore('refuels',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts')}};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VER);req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'id'});if(!d.objectStoreNames.contains('calculations')){const s=d.createObjectStore('calculations',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts')}if(!d.objectStoreNames.contains('market'))d.createObjectStore('market',{keyPath:'id'});if(!d.objectStoreNames.contains('refuels')){const s=d.createObjectStore('refuels',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts')};if(!d.objectStoreNames.contains('ledger')){const s=d.createObjectStore('ledger',{keyPath:'id',autoIncrement:true});s.createIndex('ts','ts');s.createIndex('type','type')}if(!d.objectStoreNames.contains('aiChat'))d.createObjectStore('aiChat',{keyPath:'id',autoIncrement:true})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store)}
 const put=(store,val)=>new Promise((res,rej)=>{const r=tx(store,'readwrite').put(val);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const get=(store,key)=>new Promise((res,rej)=>{const r=tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
@@ -484,6 +484,6 @@ function wire(){
 
 (async()=>{db=await openDB();let s=await loadSettings();if(s.fuelConsumption==null)s.fuelConsumption=s.fuelLitersPerDay&&s.workKmPerDay?Number(s.fuelLitersPerDay)*100/Number(s.workKmPerDay):10;if(s.planMode==null)s.planMode='invest';if(s.depositRate==null)s.depositRate=14;if(s.depositStart==null)s.depositStart=0;if(s.lastDailyKm==null)s.lastDailyKm=s.workKmPerDay||60;delete s.fuelLitersPerDay;await saveSettings(s);applySettings(s);const m=await loadMarket();renderMarket(m);renderInvest(s.risk||'balanced');await renderDashboard();await renderStats();wire();try{if(s.autoSync)refreshMarket()}catch(e){}if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});})();
 </script>
-<script src="v9features.js"></script>
+<script src="v10features.js"></script>
 </body>
 </html>
