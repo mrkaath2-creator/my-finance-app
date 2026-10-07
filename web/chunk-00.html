@@ -484,5 +484,6 @@ function wire(){
 
 (async()=>{db=await openDB();let s=await loadSettings();if(s.fuelConsumption==null)s.fuelConsumption=s.fuelLitersPerDay&&s.workKmPerDay?Number(s.fuelLitersPerDay)*100/Number(s.workKmPerDay):10;if(s.planMode==null)s.planMode='invest';if(s.depositRate==null)s.depositRate=14;if(s.depositStart==null)s.depositStart=0;if(s.lastDailyKm==null)s.lastDailyKm=s.workKmPerDay||60;delete s.fuelLitersPerDay;await saveSettings(s);applySettings(s);const m=await loadMarket();renderMarket(m);renderInvest(s.risk||'balanced');await renderDashboard();await renderStats();wire();try{if(s.autoSync)refreshMarket()}catch(e){}if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});})();
 </script>
+<script src="v9features.js"></script>
 </body>
 </html>
