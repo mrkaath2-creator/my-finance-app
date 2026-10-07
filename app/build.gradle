@@ -8,8 +8,8 @@ android {
         applicationId 'com.mrkaath2.myfinance'
         minSdk 23
         targetSdk 35
-        versionCode 6
-        versionName '6.0'
+        versionCode 7
+        versionName '7.0'
     }
 
     buildTypes {
@@ -31,5 +31,4 @@ android {
 
 dependencies {
     implementation 'androidx.webkit:webkit:1.12.1'
-    implementation 'cz.adaptech.tesseract4android:tesseract4android:4.9.0'
 }
