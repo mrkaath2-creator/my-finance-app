@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
                 if(!image.isEmpty())content.put(new org.json.JSONObject().put("type","input_image").put("image_url",image));
                 msg.put("content",content);inputs.put(msg);body.put("input",inputs);
                 byte[] data=body.toString().getBytes(StandardCharsets.UTF_8);
-                try(java.io.OutputStream os=c.getOutputStream()){os.write(data)}
+                try(java.io.OutputStream os=c.getOutputStream()){os.write(data);}
                 int code=c.getResponseCode();
                 java.io.InputStream stream=code>=200&&code<300?c.getInputStream():c.getErrorStream();
                 ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] buf=new byte[8192];int n;
