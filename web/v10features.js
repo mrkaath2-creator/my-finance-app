@@ -3,7 +3,7 @@
 var MODEL='gpt-4.1-mini',editId=null,activeType='lifeExpense',fuelEditId=null,seq=0,waiters={};
 
 function E(id){return document.getElementById(id)}
-function esc10(s){return String(s==null?'':s).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;","}'}}
+function esc10(s){return String(s==null?'':s).replace(/[&<>'\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]})}}
 function money10(n){return typeof money==='function'?money(n):Math.round(Number(n)||0).toLocaleString('ru-RU')+' ₽'}
 function pct10(n){return typeof pct==='function'?pct(n):(Number(n)||0).toLocaleString('ru-RU')+'%'}
 function say(t){if(typeof toast==='function')toast(t);else alert(t)}
