@@ -42,6 +42,9 @@ jobs:
           cp web/manifest.json app/src/main/assets/www/manifest.json
           cp web/sw.js app/src/main/assets/www/sw.js
           cp web/v10features.js app/src/main/assets/www/v10features.js
+          test -s app/src/main/assets/www/v10features.js
+          grep -q "closest('#aiSetupBtn')" app/src/main/assets/www/v10features.js
+          grep -q "aiSetupBtn" app/src/main/assets/www/v10features.js
 
       - name: Build debug APK
         run: gradle --no-daemon :app:assembleDebug
