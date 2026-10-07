@@ -99,6 +99,7 @@ function go10(id){showView(id);if(id==='stats')refresh10();if(id==='ai'){statusA
 async function clearAll10(){try{var tr=db.transaction(['calculations','refuels','ledger','aiChat'],'readwrite');tr.objectStore('calculations').clear();tr.objectStore('refuels').clear();tr.objectStore('ledger').clear();tr.objectStore('aiChat').clear();await new Promise(function(r){tr.oncomplete=r;tr.onerror=r})}catch(e){}await refresh10();await renderChat10();say('Вся история очищена')}
 async function init10(){
  compactNav();addStyle();finance10();addAi10();addAiModal10();addOpModal10();patchSettings();await refresh10();await renderChat10();statusAi();
+ var setup=E('aiSetupBtn');if(setup)setup.onclick=function(){E('aiSettings').classList.add('show');E('apiKey').value=getKey();};
  document.querySelectorAll('.nav button').forEach(function(b){var id=b.getAttribute('data-go');if(id==='home'||id==='calc')b.onclick=function(){showView(id)};if(id==='stats')b.onclick=function(){go10('stats')};if(b.hasAttribute('data-v10-ai'))b.onclick=function(){go10('ai')}});
  var sb=E('saveFuelBtn');if(sb)sb.onclick=saveFuel10;var cb=E('clearHistoryBtn');if(cb)cb.onclick=clearAll10;
  var inp=E('aiImage');if(inp)inp.onchange=function(e){if(e.target.files&&e.target.files[0])analyze10(e.target.files[0])};
