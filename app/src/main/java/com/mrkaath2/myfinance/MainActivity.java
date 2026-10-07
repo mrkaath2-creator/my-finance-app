@@ -138,10 +138,12 @@ public class MainActivity extends Activity {
                     text=sb.toString();
                 }
                 final String result=text;
-                webView.post(() -> webView.evaluateJavascript("window.onOpenAIResult("+org.json.JSONObject.quote(id)+","+org.json.JSONObject.quote(result)+")",null));
+                final String callbackId=id;
+                webView.post(() -> webView.evaluateJavascript("window.onOpenAIResult("+org.json.JSONObject.quote(callbackId)+","+org.json.JSONObject.quote(result)+")",null));
             }catch(Exception e){
                 final String err=e.getMessage()==null?"Ошибка AI":e.getMessage();
-                webView.post(() -> webView.evaluateJavascript("window.onOpenAIError("+org.json.JSONObject.quote(id)+","+org.json.JSONObject.quote(err)+")",null));
+                final String callbackId=id;
+                webView.post(() -> webView.evaluateJavascript("window.onOpenAIError("+org.json.JSONObject.quote(callbackId)+","+org.json.JSONObject.quote(err)+")",null));
             }
         }
     }
