@@ -41,9 +41,9 @@ function replaceFinance(){
  '</div>'+
  '<div class="section-title">➕ Быстро добавить</div><div class="row"><button class="btn secondary" id="mAddExpense" type="button">Трата</button><button class="btn secondary" id="mAddDeposit" type="button">Вклад</button></div><div class="row" style="margin-top:10px"><button class="btn secondary" id="mAddCar" type="button">Машина</button><button class="btn secondary" id="mAddBuffer" type="button">Запас</button></div>'+
  '<div class="section-title">🧾 Последние записи</div><div id="mRecent"></div>'+
- '<button class="btn secondary full" id="mAllHistory" style="margin-top:10px" type="button">Вся история</button>';
+ '<button class="btn secondary full" id="mAllHistory" style="margin-top:10px" type="button">Вся история</button><button class="btn secondary full manual-danger" id="mClearHistory" style="margin-top:8px" type="button">🗑️ Очистить всю историю</button>';
  s.querySelectorAll('[data-manual-type]').forEach(function(b){b.onclick=function(){openManual(b.getAttribute('data-manual-type'))}});
- Q('mAddExpense').onclick=function(){openManual('lifeExpense')};Q('mAddDeposit').onclick=function(){openManual('deposit')};Q('mAddCar').onclick=function(){openManual('car')};Q('mAddBuffer').onclick=function(){openManual('buffer')};Q('mAllHistory').onclick=function(){openManual('all')}
+ Q('mAddExpense').onclick=function(){openManual('lifeExpense')};Q('mAddDeposit').onclick=function(){openManual('deposit')};Q('mAddCar').onclick=function(){openManual('car')};Q('mAddBuffer').onclick=function(){openManual('buffer')};Q('mAllHistory').onclick=function(){openManual('all')};Q('mClearHistory').onclick=clearAllManual
 }
 
 function typeName(t){return ({income:'Доход',lifeExpense:'Траты на жизнь',fuel:'Бензин',car:'Машина',buffer:'Финансовый запас',deposit:'Вклад',investment:'Инвестиции'})[t]||'Операция'}
@@ -114,9 +114,22 @@ async function deleteFuelManual(id){await new Promise(function(res,rej){var tr=d
 
 function showManualView(id){showView(id);if(id==='stats')refreshManual()}
 async function clearAllManual(){
- if(!window.confirm('Полностью очистить историю доходов, расходов, расчётов и заправок? Настройки останутся. Отменить это действие нельзя.'))return;
- try{await new Promise(function(resolve,reject){var tr=db.transaction(['calculations','refuels','ledger','aiChat'],'readwrite');['calculations','refuels','ledger','aiChat'].forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error)};tr.onabort=function(){reject(tr.error||new Error('Отменено'))}});await refreshManual();if(Q('manualHistory'))await renderManualHistory(activeType);say('История полностью очищена')}catch(e){say('Не удалось очистить историю. Попробуй ещё раз.')}
+ if(!window.confirm('Удалить ВСЮ историю доходов, расходов, расчётов и заправок? Настройки останутся. Это нельзя отменить.'))return;
+ var btn=Q('manualClearHistory')||Q('mClearHistory');if(btn){btn.disabled=true;btn.textContent='Очищаю…'}
+ try{
+  var names=['calculations','refuels','ledger','aiChat'].filter(function(n){return db&&db.objectStoreNames&&db.objectStoreNames.contains(n)});
+  if(!names.length)throw new Error('Хранилища не найдены');
+  await new Promise(function(resolve,reject){var tr=db.transaction(names,'readwrite');names.forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error||new Error('Ошибка IndexedDB'))};tr.onabort=function(){reject(tr.error||new Error('Операция отменена'))}});
+  await refreshManual();
+  if(typeof renderDashboard==='function')await renderDashboard();
+  if(typeof renderStats==='function')await renderStats();
+  if(typeof renderHistory==='function')await renderHistory();
+  if(Q('manualHistory'))await renderManualHistory(activeType);
+  say('Готово: история полностью очищена');
+ }catch(e){console.error('clearAllManual failed',e);say('Не удалось очистить историю: '+(e&&e.message?e.message:'ошибка хранилища'))}
+ finally{if(btn){btn.disabled=false;btn.textContent=btn.id==='mClearHistory'?'🗑️ Очистить всю историю':'🗑️ Полностью очистить историю'}}
 }
+
 async function resetAllManual(){
  if(!window.confirm('СБРОСИТЬ ВСЁ ПРИЛОЖЕНИЕ? Будут удалены история, заправки, расчёты и твои настройки. Сначала сохрани резервную копию, если она нужна.'))return;
  try{await new Promise(function(resolve,reject){var tr=db.transaction(['calculations','refuels','ledger','aiChat','settings'],'readwrite');['calculations','refuels','ledger','aiChat','settings'].forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error)}});await refreshManual();say('Приложение очищено. Перезапусти его для начальных настроек.')}catch(e){say('Не удалось сбросить данные.')}
