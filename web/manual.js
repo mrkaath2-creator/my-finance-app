@@ -114,20 +114,30 @@ async function deleteFuelManual(id){await new Promise(function(res,rej){var tr=d
 
 function showManualView(id){showView(id);if(id==='stats')refreshManual()}
 async function clearAllManual(){
- if(!window.confirm('Удалить ВСЮ историю доходов, расходов, расчётов и заправок? Настройки останутся. Это нельзя отменить.'))return;
- var btn=Q('manualClearHistory')||Q('mClearHistory');if(btn){btn.disabled=true;btn.textContent='Очищаю…'}
+ var btn=Q('manualClearHistory')||Q('mClearHistory')||Q('clearHistoryBtn');
+ if(!window.confirm('Удалить историю доходов, расходов, расчётов и заправок? Настройки и цели останутся. Отменить это действие нельзя. Сначала экспортируй резервную копию, если она нужна.'))return;
+ if(btn){btn.disabled=true;btn.textContent='Очищаю историю…'}
  try{
-  var names=['calculations','refuels','ledger','aiChat'].filter(function(n){return db&&db.objectStoreNames&&db.objectStoreNames.contains(n)});
-  if(!names.length)throw new Error('Хранилища не найдены');
-  await new Promise(function(resolve,reject){var tr=db.transaction(names,'readwrite');names.forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error||new Error('Ошибка IndexedDB'))};tr.onabort=function(){reject(tr.error||new Error('Операция отменена'))}});
-  await refreshManual();
+  if(!db)throw new Error('База данных ещё загружается. Подожди пару секунд и повтори.');
+  var names=['calculations','refuels','ledger','aiChat'].filter(function(n){return db.objectStoreNames.contains(n)});
+  if(!names.length)throw new Error('История не найдена');
+  await new Promise(function(resolve,reject){
+   var tr;
+   try{tr=db.transaction(names,'readwrite');names.forEach(function(n){tr.objectStore(n).clear()})}
+   catch(e){reject(e);return}
+   tr.oncomplete=resolve;
+   tr.onerror=function(){reject(tr.error||new Error('Ошибка базы данных'))};
+   tr.onabort=function(){reject(tr.error||new Error('Операция отменена'))};
+  });
+  if(Q('calcResult'))Q('calcResult').style.display='none';
+  if(typeof refreshManual==='function')await refreshManual();
   if(typeof renderDashboard==='function')await renderDashboard();
   if(typeof renderStats==='function')await renderStats();
   if(typeof renderHistory==='function')await renderHistory();
-  if(Q('manualHistory'))await renderManualHistory(activeType);
-  say('Готово: история полностью очищена');
- }catch(e){console.error('clearAllManual failed',e);say('Не удалось очистить историю: '+(e&&e.message?e.message:'ошибка хранилища'))}
- finally{if(btn){btn.disabled=false;btn.textContent=btn.id==='mClearHistory'?'🗑️ Очистить всю историю':'🗑️ Полностью очистить историю'}}
+  if(Q('manualHistory')&&typeof renderManualHistory==='function')await renderManualHistory(activeType);
+  say('История очищена. Настройки сохранены.');
+ }catch(e){console.error('clearAllManual failed',e);say('Не удалось очистить историю: '+(e&&e.message?e.message:'ошибка базы данных'))}
+ finally{if(btn){btn.disabled=false;btn.textContent=btn.id==='clearHistoryBtn'?'Очистить историю':'🗑️ Полностью очистить историю'}}
 }
 
 async function resetAllManual(){
