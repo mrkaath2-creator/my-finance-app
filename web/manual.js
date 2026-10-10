@@ -11,7 +11,7 @@ function escM(s){return String(s==null?'':s).replace(/[&<>'"]/g,function(c){retu
 function addStyle(){
  if(Q('manualStyle'))return;
  var s=document.createElement('style');s.id='manualStyle';
- s.textContent='.manual-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(9px);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:120}.manual-modal.show{display:flex}.manual-sheet{width:min(780px,100%);max-height:90vh;overflow:auto;background:#101b2d;border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow)}.manual-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.manual-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:5px}.manual-actions button{border:1px solid var(--line);background:#182842;color:var(--text);border-radius:10px;padding:6px 8px;font-size:10px;font-weight:800}.manual-mini{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px}.manual-card{width:100%;text-align:left;color:var(--text);cursor:pointer}.manual-card:active{transform:scale(.99)}@media(max-width:430px){.nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}.nav button{font-size:9px}.nav .ico{font-size:15px}}';
+ s.textContent='.manual-modal{position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(9px);display:none;align-items:flex-end;justify-content:center;padding:12px;z-index:120}.manual-modal.show{display:flex}.manual-sheet{width:min(780px,100%);max-height:90vh;overflow:auto;background:#101b2d;border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:var(--shadow)}.manual-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.manual-actions{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:5px}.manual-actions button{border:1px solid var(--line);background:#182842;color:var(--text);border-radius:10px;padding:6px 8px;font-size:10px;font-weight:800}.manual-mini{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px}.manual-card{width:100%;text-align:left;color:var(--text);cursor:pointer}.manual-card:active{transform:scale(.99)}.manual-insight{padding:14px;border:1px solid rgba(110,231,183,.18);background:linear-gradient(135deg,rgba(110,231,183,.09),rgba(96,165,250,.07));border-radius:18px;line-height:1.45}.manual-insight b{color:var(--accent)}.manual-data-tools{margin-top:20px}.manual-danger{border:1px solid rgba(251,113,133,.35)!important;color:#ff9eae!important;background:rgba(251,113,133,.08)!important}.manual-muted{font-size:11px;color:var(--muted);line-height:1.45}@media(max-width:430px){.nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}.nav button{font-size:9px}.nav .ico{font-size:15px}}';
  document.head.appendChild(s)
 }
 
@@ -28,6 +28,7 @@ function replaceFinance(){
  var s=Q('stats');if(!s)return;
  s.innerHTML='<div class="section-title" style="margin-top:5px">Финансы</div>'+
  '<div class="hero" style="padding:18px"><div class="eyebrow">Твои деньги</div><h2 style="font-size:24px">Всё можно менять вручную.</h2><p>Нажми на любую карточку, чтобы открыть историю, добавить запись, изменить или удалить её.</p></div>'+
+ '<div class="section-title">Этот месяц</div><div class="summary-grid"><div class="metric"><div class="k">Доходы</div><div class="v good" id="mMonthIncome">0 ₽</div></div><div class="metric"><div class="k">Траты на жизнь</div><div class="v danger" id="mMonthExpense">0 ₽</div></div><div class="metric"><div class="k">Остаток месяца</div><div class="v" id="mMonthNet">0 ₽</div></div><div class="metric"><div class="k">Операций</div><div class="v" id="mMonthOps">0</div></div></div><div class="manual-insight" id="mInsight" style="margin-top:10px">Собираю картину финансов…</div>'+
  '<div class="section-title">Баланс</div><div class="summary-grid">'+
  '<button class="metric manual-card" data-manual-type="income"><div class="k">💰 Доход</div><div class="v" id="mIncome">0 ₽</div><div class="manual-mini" id="mIncomeSub">Среднее 0 ₽/день</div></button>'+
  '<button class="metric manual-card" data-manual-type="lifeExpense"><div class="k">🛒 Траты на жизнь</div><div class="v danger" id="mLife">0 ₽</div><div class="manual-mini" id="mLifeSub">Среднее 0 ₽/день</div></button>'+
@@ -49,9 +50,9 @@ function typeName(t){return ({income:'Доход',lifeExpense:'Траты на �
 
 async function totalsManual(){
  var c=await all('calculations'),l=await all('ledger'),r=await all('refuels');
- var income=0,km=0,fuel=0,car=0,buf=0,dep=0,inv=0,life=0,recent=[];
- c.forEach(function(x){var d=x.data||{};income+=Number(d.amount)||0;km+=Number(d.mileage)||0;fuel+=Number(d.fuel)||0;car+=Number(d.car)||0;buf+=Number(d.buffer)||0;dep+=Number(d.deposit)||0;inv+=Number(d.invest)||0;recent.push({source:'day',id:x.id,type:'income',amount:Number(d.amount)||0,sign:1,category:'Яндекс Доставка',note:'Расчёт дня',ts:x.ts})});
- l.forEach(function(x){var a=Number(x.amount)||0,s=Number(x.sign||1);if(x.type==='income')income+=a*s;if(x.type==='car')car+=a*s;if(x.type==='buffer')buf+=a*s;if(x.type==='deposit')dep+=a*s;if(x.type==='investment')inv+=a*s;if(x.type==='lifeExpense')life+=a;recent.push({source:'ledger',id:x.id,type:x.type,amount:a,sign:s,category:x.category,note:x.note,ts:x.ts})});
+ var income=0,km=0,fuel=0,car=0,buf=0,dep=0,inv=0,life=0,recent=[],monthIncome=0,monthExpense=0,monthOps=0;var now=new Date(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+ c.forEach(function(x){var d=x.data||{};income+=Number(d.amount)||0;km+=Number(d.mileage)||0;fuel+=Number(d.fuel)||0;car+=Number(d.car)||0;buf+=Number(d.buffer)||0;dep+=Number(d.deposit)||0;inv+=Number(d.invest)||0;if(Number(x.ts)>=monthStart){monthIncome+=Number(d.amount)||0;monthOps++}recent.push({source:'day',id:x.id,type:'income',amount:Number(d.amount)||0,sign:1,category:'Яндекс Доставка',note:'Расчёт дня',ts:x.ts})});
+ l.forEach(function(x){var a=Number(x.amount)||0,s=Number(x.sign||1);if(Number(x.ts)>=monthStart){monthOps++;if(x.type==='income')monthIncome+=a*s;if(x.type==='lifeExpense')monthExpense+=a}if(x.type==='income')income+=a*s;if(x.type==='car')car+=a*s;if(x.type==='buffer')buf+=a*s;if(x.type==='deposit')dep+=a*s;if(x.type==='investment')inv+=a*s;if(x.type==='lifeExpense')life+=a;recent.push({source:'ledger',id:x.id,type:x.type,amount:a,sign:s,category:x.category,note:x.note,ts:x.ts})});
  var spent=r.reduce(function(s,x){return s+(Number(x.cost)||0)},0);r.forEach(function(x){recent.push({source:'fuel',id:x.id,type:'fuel',amount:Number(x.cost)||0,sign:-1,category:'Бензин',note:x.note||'Заправка',ts:x.ts})});
  recent.sort(function(a,b){return b.ts-a.ts});
  var days=Math.max(1,c.length),allSpent=life+spent;
@@ -60,7 +61,7 @@ async function totalsManual(){
 
 async function refreshManual(){
  var t=await totalsManual(),s=await loadSettings(),set=function(id,v){var e=Q(id);if(e)e.textContent=v};
- set('mIncome',M(t.income));set('mIncomeSub','Среднее '+M(t.avgIncome)+'/день');
+ set('mMonthIncome',M(t.monthIncome));set('mMonthExpense',M(t.monthExpense));set('mMonthNet',M(t.monthNet));set('mMonthOps',String(t.monthOps));set('mInsight',t.monthIncome===0&&t.monthExpense===0?'Добавь первый доход или расход — и здесь появится понятная сводка месяца.':t.monthNet<0?'В этом месяце расходы на жизнь выше учтённых доходов. Проверь записи и запланируй траты на оставшиеся дни.':'Учтённый остаток месяца: '+M(t.monthNet)+'. '+(t.monthIncome>0?'На жизнь ушло '+Math.round(t.monthExpense/t.monthIncome*100)+'% от доходов.':'Добавь доходы, чтобы увидеть долю расходов.'));set('mIncome',M(t.income));set('mIncomeSub','Среднее '+M(t.avgIncome)+'/день');
  set('mLife',M(t.life));set('mLifeSub','Среднее '+M(t.life/Math.max(1,t.days))+'/день');
  set('mFuel',M(t.fuelLeft));set('mFuelSub','Отложено '+M(t.fuel)+' · заправки '+M(t.spent));
  set('mCar',M(Math.max(0,t.car)));set('mBuffer',M(Math.max(0,t.buf)));set('mDeposit',M(Math.max(0,t.dep)));set('mDepositSub','Ставка '+P(Number(s.depositRate)||0)+' · ≈ '+M(t.dep*(Number(s.depositRate)||0)/100/12)+'/мес');
@@ -93,8 +94,8 @@ async function renderManualHistory(type){
 
 async function saveManual(){
  var type=Q('manualType').value,amount=Math.abs(Number(Q('manualAmount').value)||0);if(!amount){say('Укажи сумму');return}
- var d=Q('manualDate').value,ts=d?new Date(d+'T12:00:00').getTime():Date.now(),data={type:type,amount:amount,sign:type==='lifeExpense'?-1:Number(Q('manualSign').value)||1,category:Q('manualCat').value.trim(),note:Q('manualNote').value.trim(),ts:ts};
- if(editId)data.id=editId;await put('ledger',data);closeManual();await refreshManual();say(editId?'Запись изменена':'Запись сохранена')
+ var d=Q('manualDate').value,ts=d?new Date(d+'T12:00:00').getTime():Date.now(),data={type:type,amount:amount,sign:Number(Q('manualSign').value)||1,category:Q('manualCat').value.trim(),note:Q('manualNote').value.trim(),ts:ts};
+ var wasEdit=!!editId;if(editId)data.id=editId;await put('ledger',data);closeManual();await refreshManual();say(wasEdit?'Запись изменена':'Запись сохранена')
 }
 async function deleteManual(source,id){
  if(source==='fuel'){await deleteFuelManual(id);return}
@@ -112,12 +113,17 @@ async function deleteFuelManual(id){await new Promise(function(res,rej){var tr=d
 
 function showManualView(id){showView(id);if(id==='stats')refreshManual()}
 async function clearAllManual(){
- try{var tr=db.transaction(['calculations','refuels','ledger','aiChat'],'readwrite');tr.objectStore('calculations').clear();tr.objectStore('refuels').clear();tr.objectStore('ledger').clear();tr.objectStore('aiChat').clear();await new Promise(function(r){tr.oncomplete=r;tr.onerror=r})}catch(e){}
- await refreshManual();say('История очищена')
+ if(!window.confirm('Полностью очистить историю доходов, расходов, расчётов и заправок? Настройки останутся. Отменить это действие нельзя.'))return;
+ try{await new Promise(function(resolve,reject){var tr=db.transaction(['calculations','refuels','ledger','aiChat'],'readwrite');['calculations','refuels','ledger','aiChat'].forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error)};tr.onabort=function(){reject(tr.error||new Error('Отменено'))}});await refreshManual();if(Q('manualHistory'))await renderManualHistory(activeType);say('История полностью очищена')}catch(e){say('Не удалось очистить историю. Попробуй ещё раз.')}
 }
+async function resetAllManual(){
+ if(!window.confirm('СБРОСИТЬ ВСЁ ПРИЛОЖЕНИЕ? Будут удалены история, заправки, расчёты и твои настройки. Сначала сохрани резервную копию, если она нужна.'))return;
+ try{await new Promise(function(resolve,reject){var tr=db.transaction(['calculations','refuels','ledger','aiChat','settings'],'readwrite');['calculations','refuels','ledger','aiChat','settings'].forEach(function(n){tr.objectStore(n).clear()});tr.oncomplete=resolve;tr.onerror=function(){reject(tr.error)}});await refreshManual();say('Приложение очищено. Перезапусти его для начальных настроек.')}catch(e){say('Не удалось сбросить данные.')}
+}
+function addDataTools(){var s=Q('settings');if(!s||Q('manualDataTools'))return;s.insertAdjacentHTML('beforeend','<div class="manual-data-tools" id="manualDataTools"><div class="section-title">🧰 История и резервная копия</div><div class="card grid"><div class="manual-muted">Сначала экспортируй резервную копию, если хочешь сохранить записи. Очистка истории удаляет все сохранённые доходы, расходы, расчёты и заправки, но оставляет настройки.</div><button class="btn secondary full" id="manualExport" type="button">⬇️ Экспортировать резервную копию</button><button class="btn secondary full manual-danger" id="manualClearHistory" type="button">🗑️ Полностью очистить историю</button><button class="btn secondary full manual-danger" id="manualResetAll" type="button">Сбросить всё приложение</button></div></div>');Q('manualExport').onclick=function(){if(typeof exportDB==='function')exportDB();else say('Экспорт сейчас недоступен')};Q('manualClearHistory').onclick=clearAllManual;Q('manualResetAll').onclick=resetAllManual;}
 
 async function initManual(){
- addStyle();compactNav();replaceFinance();addModal();
+ addStyle();compactNav();replaceFinance();addModal();addDataTools();
  if(Q('fuelModal')){Q('saveFuelBtn').onclick=saveFuelManual;Q('closeFuelModal').onclick=function(){Q('fuelModal').classList.remove('show')};Q('cancelFuelBtn').onclick=function(){Q('fuelModal').classList.remove('show')};Q('refuelCost').oninput=function(){var l=Number(Q('refuelLiters').value)||0,c=Number(Q('refuelCost').value)||0;Q('refuelPriceHint').textContent=l&&c?'Получается '+(c/l).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽/л.':'Цена за литр посчитается автоматически.'}};
  if(Q('clearHistoryBtn'))Q('clearHistoryBtn').onclick=clearAllManual;
  if(Q('exportBtn'))Q('exportBtn').onclick=function(){if(typeof exportDB==='function')exportDB()};
