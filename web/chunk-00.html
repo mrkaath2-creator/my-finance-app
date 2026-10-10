@@ -376,32 +376,17 @@ function renderInvest(p){(async()=>{
 
 async function renderHistory(){const list=document.getElementById('historyList');const rows=(await all('calculations')).sort((a,b)=>b.ts-a.ts);if(!rows.length){list.innerHTML='<div class="card empty">История пока пуста.</div>';return}list.innerHTML=rows.map((x,i)=>{const r=x.data;r._ts=x.ts;const isDeposit=r.planMode==='deposit';return `<div class="history-item"><div><div class="date">${new Date(x.ts).toLocaleString('ru-RU')}</div><div style="margin-top:3px;font-weight:850">${esc(r.note||'Расчёт')}</div><div class="history-detail">Доход ${money(r.amount)} · жизнь ${money(r.life||0)} · бензин ${money(r.fuel||0)} · авто ${money(r.car||0)} · ${r.mileage||0} км</div><div class="history-detail">${isDeposit?'Вклад':'Инвестиции'}: <b>${money(r.target||r.invest||0)}</b> · ставка ${pct(r.rate||0)}${r.horizon?` · прогноз ${r.horizon} г. — ${money(r.projection?.value||0)}`:''}</div></div><div><div class="total">${money(r.amount)}</div><div class="date">№${rows.length-i}</div></div></div>`}).join('')}
 
-async function exportDB(){const settings=await loadSettings(),calculations=await all('calculations'),refuels=await all('refuels'),market=await loadMarket();const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),settings,market,calculations,refuels},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`my-finance-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Резервная копия подготовлена')}
+async function exportDB(){try{const settings=await loadSettings(),calculations=await all('calculations'),refuels=await all('refuels'),ledger=await all('ledger'),market=await loadMarket();const blob=new Blob([JSON.stringify({version:3,exportedAt:new Date().toISOString(),settings,market,calculations,refuels,ledger},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`my-finance-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast('Резервная копия создана, включая всю историю')}catch(e){console.error(e);toast('Ошибка экспорта резервной копии')}}
 async function clearHistory(){
-  try{
-    const items=await all('calculations');
-    const fuelItems=await all('refuels');
-    if(items.length||fuelItems.length){
-      await new Promise((resolve,reject)=>{
-        const tr=db.transaction(['calculations','refuels'],'readwrite');
-        const store=tr.objectStore('calculations'),fuelStore=tr.objectStore('refuels');
-        items.forEach(item=>{if(item.id!==undefined&&item.id!==null)store.delete(item.id)});
-        fuelItems.forEach(item=>{if(item.id!==undefined&&item.id!==null)fuelStore.delete(item.id)});
-        tr.oncomplete=()=>resolve();
-        tr.onerror=()=>reject(tr.error||new Error('Ошибка транзакции'));
-        tr.onabort=()=>reject(tr.error||new Error('Транзакция отменена'));
-      });
-    }
-    const result=document.getElementById('calcResult');
-    if(result)result.style.display='none';
-    await renderHistory();
-    await renderStats();
-    await renderDashboard();
-    toast((items.length||fuelItems.length)?'История и заправки полностью очищены':'История уже пустая');
-  }catch(e){
-    console.error(e);
-    toast('Не удалось очистить историю — проверь доступ к хранилищу');
-  }
+ if(!confirm('Удалить всю историю расчётов, доходов, расходов и заправок? Настройки останутся. Сначала сделай резервную копию, если она нужна.'))return;
+ try{
+  const names=['calculations','refuels','ledger','aiChat'].filter(n=>db.objectStoreNames.contains(n));
+  await new Promise((resolve,reject)=>{const tr=db.transaction(names,'readwrite');names.forEach(n=>tr.objectStore(n).clear());tr.oncomplete=resolve;tr.onerror=()=>reject(tr.error||new Error('Ошибка базы'));tr.onabort=()=>reject(tr.error||new Error('Операция отменена'))});
+  const result=document.getElementById('calcResult');if(result)result.style.display='none';
+  await Promise.all([renderHistory(),renderStats(),renderDashboard()]);
+  if(typeof refreshManual==='function')await refreshManual();
+  toast('Вся история очищена');
+ }catch(e){console.error(e);toast('Не удалось очистить историю. Попробуй ещё раз')}
 }
 
 
