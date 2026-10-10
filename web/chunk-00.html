@@ -454,7 +454,7 @@ function wire(){
   ['dailyIncome','dailyKm'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('keydown',e=>{if(e.key==='Enter')runCalculation()})});
   document.getElementById('syncBtn').addEventListener('click',refreshMarket);
   document.getElementById('exportBtn').addEventListener('click',exportDB);
-  document.getElementById('clearHistoryBtn').addEventListener('click',clearHistory);
+  document.getElementById('clearHistoryBtn').onclick=clearHistory;
   document.getElementById('saveSettingsBtn').addEventListener('click',saveSettingsUI);
   document.getElementById('modeInvestBtn').addEventListener('click',async()=>{const s=await loadSettings();s.planMode='invest';updatePlanModeUI(s);await saveSettings(s);toast('Выбрано: инвестировать')});
   document.getElementById('modeDepositBtn').addEventListener('click',async()=>{const s=await loadSettings();s.planMode='deposit';updatePlanModeUI(s);await saveSettings(s);toast('Выбрано: вклад')});
