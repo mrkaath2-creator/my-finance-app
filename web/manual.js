@@ -56,7 +56,7 @@ async function totalsManual(){
  var spent=r.reduce(function(s,x){return s+(Number(x.cost)||0)},0);r.forEach(function(x){recent.push({source:'fuel',id:x.id,type:'fuel',amount:Number(x.cost)||0,sign:-1,category:'Бензин',note:x.note||'Заправка',ts:x.ts})});
  recent.sort(function(a,b){return b.ts-a.ts});
  var days=Math.max(1,c.length),allSpent=life+spent;
- return {c:c,l:l,r:r,income:income,km:km,fuel:fuel,car:car,buf:buf,dep:dep,inv:inv,life:life,spent:spent,fuelLeft:Math.max(0,fuel-spent),avgIncome:income/days,avgSpend:allSpent/days,days:days,allSpent:allSpent,recent:recent}
+ return {c:c,l:l,r:r,income:income,km:km,fuel:fuel,car:car,buf:buf,dep:dep,inv:inv,life:life,spent:spent,fuelLeft:Math.max(0,fuel-spent),avgIncome:income/days,avgSpend:allSpent/days,days:days,allSpent:allSpent,recent:recent,monthIncome:monthIncome,monthExpense:monthExpense,monthNet:monthIncome-monthExpense,monthOps:monthOps}
 }
 
 async function refreshManual(){
